@@ -1,0 +1,34 @@
+import { existsSync } from "node:fs";
+import { defineConfig, devices } from "@playwright/test";
+
+// 開発コンテナには固定版の Chromium が入っているので、あればそれを使う。
+// CI では `npx playwright install chromium` で入れたものを使う。
+const localChromium = process.env.PLAYWRIGHT_CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
+const executablePath = !process.env.CI && existsSync(localChromium) ? localChromium : undefined;
+
+const port = Number(process.env.E2E_PORT ?? 3100);
+
+export default defineConfig({
+  testDir: "tests/e2e",
+  forbidOnly: !!process.env.CI,
+  retries: 0,
+  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
+  use: {
+    baseURL: `http://127.0.0.1:${port}`,
+    locale: "ja-JP",
+    timezoneId: "Asia/Tokyo",
+    trace: "retain-on-failure",
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], launchOptions: { executablePath } },
+    },
+  ],
+  webServer: {
+    command: `npm run build && npx next start -p ${port}`,
+    url: `http://127.0.0.1:${port}`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 240_000,
+  },
+});

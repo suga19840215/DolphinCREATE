@@ -1,0 +1,21 @@
+# 依存・生成物
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+
+# 秘密情報（.env.example だけをコミットする）
+.env
+.env.*
+!.env.example
+
+# Supabase ローカル
+supabase/.temp/
+supabase/.branches/
+
+# OS
+.DS_Store

@@ -1,0 +1,10 @@
+docs/
+node_modules/
+.next/
+coverage/
+playwright-report/
+test-results/
+supabase/.temp/
+package-lock.json
+next-env.d.ts
+CLAUDE.md

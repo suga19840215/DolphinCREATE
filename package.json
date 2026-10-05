@@ -1,0 +1,47 @@
+{
+  "name": "dolphin-create",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dolphin CREATE — Dolphin接客データ連動型 広告運用・成果分析システム",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
+    "test:db": "supabase test db"
+  },
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.8",
+    "prettier": "^3.9.9",
+    "supabase": "^2.119.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
