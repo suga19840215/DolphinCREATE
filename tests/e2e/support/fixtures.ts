@@ -192,6 +192,31 @@ export async function seed() {
     }
   }
 
+  // 取込データを空にする（毎回同じ状態から確かめる）
+  for (const t of [
+    "market_report",
+    "asset",
+    "funnel_event",
+    "media_daily_metric",
+    "crm_lead",
+    "transcript_segment",
+    "customer_insight",
+    "consent_record",
+    "consultation_session",
+    "import_job",
+  ] as const) {
+    await a.from(t).delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
+  }
+  for (const code of ["fac_A", "fac_B"]) {
+    const { data: files } = await a.storage
+      .from("facility-files")
+      .list(`${ids[code]}/assets/dolphin`);
+    if (files?.length)
+      await a.storage
+        .from("facility-files")
+        .remove(files.map((f) => `${ids[code]}/assets/dolphin/${f.name}`));
+  }
+
   // 施設ごとのファイルと操作の記録
   const png = Buffer.from(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",

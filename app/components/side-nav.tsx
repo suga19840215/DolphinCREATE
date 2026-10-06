@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const MENU = [
   { key: "", n: "◎", label: "施設の概要", ready: true },
-  { key: "dolphin", n: "1", label: "Dolphinデータ連携", ready: false },
+  { key: "dolphin", n: "1", label: "Dolphinデータ連携", ready: true },
   { key: "analysis", n: "2", label: "Dolphinデータを分析", ready: false },
   { key: "creative", n: "3", label: "広告クリエイティブ案", ready: false },
   { key: "adreport", n: "4", label: "広告分析レポート", ready: false },

@@ -29,6 +29,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      can_import: {
+        Args: { fid: string; kind: Database["app"]["Enums"]["import_kind"] };
+        Returns: boolean;
+      };
+      can_write_import_rows: {
+        Args: { fid: string; job: string; kind: Database["app"]["Enums"]["import_kind"] };
+        Returns: boolean;
+      };
       has_role: {
         Args: { fid: string; roles?: Database["app"]["Enums"]["role"][] };
         Returns: boolean;
@@ -41,6 +49,9 @@ export type Database = {
     };
     Enums: {
       facility_kind: "hq" | "venue";
+      import_kind: "consultation" | "crm" | "ads" | "ga4" | "images" | "market_report";
+      media: "google_search" | "demand_gen" | "meta";
+      outcome: "contracted" | "not_contracted" | "pending";
       role: "hq_admin" | "marketing" | "creative" | "facility_admin" | "venue_staff" | "viewer";
       user_status: "invited" | "active" | "suspended";
     };
@@ -106,6 +117,72 @@ export type Database = {
           },
         ];
       };
+      asset: {
+        Row: {
+          approval_status: string;
+          code: string;
+          created_at: string;
+          expires_on: string | null;
+          facility_id: string;
+          gen_prompt: string | null;
+          gen_target: string | null;
+          id: string;
+          import_job_id: string | null;
+          kind: string;
+          rights_status: string;
+          source: string | null;
+          storage_path: string | null;
+          title: string | null;
+        };
+        Insert: {
+          approval_status?: string;
+          code: string;
+          created_at?: string;
+          expires_on?: string | null;
+          facility_id: string;
+          gen_prompt?: string | null;
+          gen_target?: string | null;
+          id?: string;
+          import_job_id?: string | null;
+          kind: string;
+          rights_status?: string;
+          source?: string | null;
+          storage_path?: string | null;
+          title?: string | null;
+        };
+        Update: {
+          approval_status?: string;
+          code?: string;
+          created_at?: string;
+          expires_on?: string | null;
+          facility_id?: string;
+          gen_prompt?: string | null;
+          gen_target?: string | null;
+          id?: string;
+          import_job_id?: string | null;
+          kind?: string;
+          rights_status?: string;
+          source?: string | null;
+          storage_path?: string | null;
+          title?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "asset_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "asset_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       auth_audit: {
         Row: {
           actor_id: string | null;
@@ -167,6 +244,289 @@ export type Database = {
           },
         ];
       };
+      consent_record: {
+        Row: {
+          ad_improvement: boolean;
+          analysis: boolean | null;
+          consultation_id: string;
+          facility_id: string;
+          given_at: string | null;
+          id: string;
+          import_job_id: string;
+          recording: boolean | null;
+          text_version: string | null;
+          transcription: boolean | null;
+          withdrawn_at: string | null;
+        };
+        Insert: {
+          ad_improvement: boolean;
+          analysis?: boolean | null;
+          consultation_id: string;
+          facility_id: string;
+          given_at?: string | null;
+          id?: string;
+          import_job_id: string;
+          recording?: boolean | null;
+          text_version?: string | null;
+          transcription?: boolean | null;
+          withdrawn_at?: string | null;
+        };
+        Update: {
+          ad_improvement?: boolean;
+          analysis?: boolean | null;
+          consultation_id?: string;
+          facility_id?: string;
+          given_at?: string | null;
+          id?: string;
+          import_job_id?: string;
+          recording?: boolean | null;
+          text_version?: string | null;
+          transcription?: boolean | null;
+          withdrawn_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consent_record_consultation_id_fkey";
+            columns: ["consultation_id"];
+            isOneToOne: false;
+            referencedRelation: "consultation_session";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consent_record_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consent_record_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      consultation_session: {
+        Row: {
+          ad_id: string | null;
+          age_band: string | null;
+          area_band: string | null;
+          cluster_code: string | null;
+          competitor_name: string | null;
+          consulted_at: string | null;
+          created_at: string;
+          decision_factor: string | null;
+          external_id: string;
+          facility_id: string;
+          id: string;
+          import_job_id: string;
+          lead_id: string;
+          noncontract_reason: string | null;
+          outcome: Database["app"]["Enums"]["outcome"] | null;
+          source: string | null;
+          staff_code: string | null;
+          visit_motive: string | null;
+        };
+        Insert: {
+          ad_id?: string | null;
+          age_band?: string | null;
+          area_band?: string | null;
+          cluster_code?: string | null;
+          competitor_name?: string | null;
+          consulted_at?: string | null;
+          created_at?: string;
+          decision_factor?: string | null;
+          external_id: string;
+          facility_id: string;
+          id?: string;
+          import_job_id: string;
+          lead_id: string;
+          noncontract_reason?: string | null;
+          outcome?: Database["app"]["Enums"]["outcome"] | null;
+          source?: string | null;
+          staff_code?: string | null;
+          visit_motive?: string | null;
+        };
+        Update: {
+          ad_id?: string | null;
+          age_band?: string | null;
+          area_band?: string | null;
+          cluster_code?: string | null;
+          competitor_name?: string | null;
+          consulted_at?: string | null;
+          created_at?: string;
+          decision_factor?: string | null;
+          external_id?: string;
+          facility_id?: string;
+          id?: string;
+          import_job_id?: string;
+          lead_id?: string;
+          noncontract_reason?: string | null;
+          outcome?: Database["app"]["Enums"]["outcome"] | null;
+          source?: string | null;
+          staff_code?: string | null;
+          visit_motive?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "consultation_session_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "consultation_session_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      crm_lead: {
+        Row: {
+          ad_id: string | null;
+          cancelled_at: string | null;
+          channel: string | null;
+          click_id: string | null;
+          contracted_at: string | null;
+          facility_id: string;
+          ga4_client_id: string | null;
+          gross_profit_yen: number | null;
+          id: string;
+          import_job_id: string;
+          is_valid: boolean | null;
+          lead_id: string;
+          lost_reason: string | null;
+          outcome: Database["app"]["Enums"]["outcome"] | null;
+          reserved_at: string | null;
+          revenue_yen: number | null;
+          updated_at: string;
+          utm_campaign: string | null;
+          utm_content: string | null;
+          utm_medium: string | null;
+          utm_source: string | null;
+          utm_term: string | null;
+          visited_at: string | null;
+        };
+        Insert: {
+          ad_id?: string | null;
+          cancelled_at?: string | null;
+          channel?: string | null;
+          click_id?: string | null;
+          contracted_at?: string | null;
+          facility_id: string;
+          ga4_client_id?: string | null;
+          gross_profit_yen?: number | null;
+          id?: string;
+          import_job_id: string;
+          is_valid?: boolean | null;
+          lead_id: string;
+          lost_reason?: string | null;
+          outcome?: Database["app"]["Enums"]["outcome"] | null;
+          reserved_at?: string | null;
+          revenue_yen?: number | null;
+          updated_at?: string;
+          utm_campaign?: string | null;
+          utm_content?: string | null;
+          utm_medium?: string | null;
+          utm_source?: string | null;
+          utm_term?: string | null;
+          visited_at?: string | null;
+        };
+        Update: {
+          ad_id?: string | null;
+          cancelled_at?: string | null;
+          channel?: string | null;
+          click_id?: string | null;
+          contracted_at?: string | null;
+          facility_id?: string;
+          ga4_client_id?: string | null;
+          gross_profit_yen?: number | null;
+          id?: string;
+          import_job_id?: string;
+          is_valid?: boolean | null;
+          lead_id?: string;
+          lost_reason?: string | null;
+          outcome?: Database["app"]["Enums"]["outcome"] | null;
+          reserved_at?: string | null;
+          revenue_yen?: number | null;
+          updated_at?: string;
+          utm_campaign?: string | null;
+          utm_content?: string | null;
+          utm_medium?: string | null;
+          utm_source?: string | null;
+          utm_term?: string | null;
+          visited_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "crm_lead_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      customer_insight: {
+        Row: {
+          confidence: number | null;
+          consultation_id: string;
+          explicit_or_inferred: string | null;
+          facility_id: string;
+          id: string;
+          kind: string;
+          label: string;
+          rank: number | null;
+        };
+        Insert: {
+          confidence?: number | null;
+          consultation_id: string;
+          explicit_or_inferred?: string | null;
+          facility_id: string;
+          id?: string;
+          kind: string;
+          label: string;
+          rank?: number | null;
+        };
+        Update: {
+          confidence?: number | null;
+          consultation_id?: string;
+          explicit_or_inferred?: string | null;
+          facility_id?: string;
+          id?: string;
+          kind?: string;
+          label?: string;
+          rank?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_insight_consultation_id_fkey";
+            columns: ["consultation_id"];
+            isOneToOne: false;
+            referencedRelation: "consultation_session";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_insight_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       facility: {
         Row: {
           code: string;
@@ -221,6 +581,303 @@ export type Database = {
         };
         Relationships: [];
       };
+      funnel_event: {
+        Row: {
+          ad_id: string;
+          date: string;
+          facility_id: string;
+          form_error: number;
+          form_start: number;
+          generate_lead: number;
+          id: string;
+          import_job_id: string;
+          landing_page: string;
+          lp_sessions: number;
+          select_fair: number;
+          updated_at: string;
+          view_fair: number;
+        };
+        Insert: {
+          ad_id: string;
+          date: string;
+          facility_id: string;
+          form_error?: number;
+          form_start?: number;
+          generate_lead?: number;
+          id?: string;
+          import_job_id: string;
+          landing_page?: string;
+          lp_sessions?: number;
+          select_fair?: number;
+          updated_at?: string;
+          view_fair?: number;
+        };
+        Update: {
+          ad_id?: string;
+          date?: string;
+          facility_id?: string;
+          form_error?: number;
+          form_start?: number;
+          generate_lead?: number;
+          id?: string;
+          import_job_id?: string;
+          landing_page?: string;
+          lp_sessions?: number;
+          select_fair?: number;
+          updated_at?: string;
+          view_fair?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "funnel_event_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "funnel_event_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      import_job: {
+        Row: {
+          at: string;
+          encoding: string | null;
+          facility_id: string;
+          file_name: string;
+          file_sha256: string;
+          id: string;
+          kind: Database["app"]["Enums"]["import_kind"];
+          mapping: NonNullable<Json>;
+          masked_count: number;
+          media: Database["app"]["Enums"]["media"] | null;
+          pii_columns_dropped: string[];
+          rows_duplicate: number;
+          rows_invalid: number;
+          rows_missing: number;
+          rows_no_consent: number;
+          rows_ok: number;
+          rows_total: number;
+          rows_updated: number;
+          rows_wrong_facility: number;
+          run_by: string | null;
+          run_label: string | null;
+        };
+        Insert: {
+          at?: string;
+          encoding?: string | null;
+          facility_id: string;
+          file_name: string;
+          file_sha256: string;
+          id?: string;
+          kind: Database["app"]["Enums"]["import_kind"];
+          mapping?: NonNullable<Json>;
+          masked_count?: number;
+          media?: Database["app"]["Enums"]["media"] | null;
+          pii_columns_dropped?: string[];
+          rows_duplicate?: number;
+          rows_invalid?: number;
+          rows_missing?: number;
+          rows_no_consent?: number;
+          rows_ok?: number;
+          rows_total?: number;
+          rows_updated?: number;
+          rows_wrong_facility?: number;
+          run_by?: string | null;
+          run_label?: string | null;
+        };
+        Update: {
+          at?: string;
+          encoding?: string | null;
+          facility_id?: string;
+          file_name?: string;
+          file_sha256?: string;
+          id?: string;
+          kind?: Database["app"]["Enums"]["import_kind"];
+          mapping?: NonNullable<Json>;
+          masked_count?: number;
+          media?: Database["app"]["Enums"]["media"] | null;
+          pii_columns_dropped?: string[];
+          rows_duplicate?: number;
+          rows_invalid?: number;
+          rows_missing?: number;
+          rows_no_consent?: number;
+          rows_ok?: number;
+          rows_total?: number;
+          rows_updated?: number;
+          rows_wrong_facility?: number;
+          run_by?: string | null;
+          run_label?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_job_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "import_job_run_by_fkey";
+            columns: ["run_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      market_report: {
+        Row: {
+          area: string;
+          avg_guests: number | null;
+          avg_spend_yen: number | null;
+          data_source: string;
+          facility_id: string;
+          id: string;
+          import_job_id: string;
+          market_weddings: number | null;
+          notes: string | null;
+          origin: string;
+          payload: NonNullable<Json>;
+          period_end: string;
+          period_start: string;
+          report_created_at: string;
+          report_id: string;
+          sample_size: number;
+          version: number;
+        };
+        Insert: {
+          area: string;
+          avg_guests?: number | null;
+          avg_spend_yen?: number | null;
+          data_source: string;
+          facility_id: string;
+          id?: string;
+          import_job_id: string;
+          market_weddings?: number | null;
+          notes?: string | null;
+          origin?: string;
+          payload?: NonNullable<Json>;
+          period_end: string;
+          period_start: string;
+          report_created_at: string;
+          report_id: string;
+          sample_size: number;
+          version: number;
+        };
+        Update: {
+          area?: string;
+          avg_guests?: number | null;
+          avg_spend_yen?: number | null;
+          data_source?: string;
+          facility_id?: string;
+          id?: string;
+          import_job_id?: string;
+          market_weddings?: number | null;
+          notes?: string | null;
+          origin?: string;
+          payload?: NonNullable<Json>;
+          period_end?: string;
+          period_start?: string;
+          report_created_at?: string;
+          report_id?: string;
+          sample_size?: number;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "market_report_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "market_report_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      media_daily_metric: {
+        Row: {
+          ad_group: string | null;
+          ad_id: string;
+          ad_name: string | null;
+          asset_code: string | null;
+          campaign: string | null;
+          clicks: number;
+          cost_yen: number;
+          date: string;
+          facility_id: string;
+          id: string;
+          import_job_id: string;
+          impressions: number;
+          media: Database["app"]["Enums"]["media"];
+          media_reported_cv: number;
+          source: string;
+          updated_at: string;
+        };
+        Insert: {
+          ad_group?: string | null;
+          ad_id: string;
+          ad_name?: string | null;
+          asset_code?: string | null;
+          campaign?: string | null;
+          clicks?: number;
+          cost_yen?: number;
+          date: string;
+          facility_id: string;
+          id?: string;
+          import_job_id: string;
+          impressions?: number;
+          media: Database["app"]["Enums"]["media"];
+          media_reported_cv?: number;
+          source?: string;
+          updated_at?: string;
+        };
+        Update: {
+          ad_group?: string | null;
+          ad_id?: string;
+          ad_name?: string | null;
+          asset_code?: string | null;
+          campaign?: string | null;
+          clicks?: number;
+          cost_yen?: number;
+          date?: string;
+          facility_id?: string;
+          id?: string;
+          import_job_id?: string;
+          impressions?: number;
+          media?: Database["app"]["Enums"]["media"];
+          media_reported_cv?: number;
+          source?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_daily_metric_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_daily_metric_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       operation_log: {
         Row: {
           action: string;
@@ -262,6 +919,54 @@ export type Database = {
           },
           {
             foreignKeyName: "operation_log_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      transcript_segment: {
+        Row: {
+          confidence: number | null;
+          consultation_id: string;
+          end_sec: number | null;
+          facility_id: string;
+          id: string;
+          speaker: string | null;
+          start_sec: number | null;
+          text_masked: string;
+        };
+        Insert: {
+          confidence?: number | null;
+          consultation_id: string;
+          end_sec?: number | null;
+          facility_id: string;
+          id?: string;
+          speaker?: string | null;
+          start_sec?: number | null;
+          text_masked: string;
+        };
+        Update: {
+          confidence?: number | null;
+          consultation_id?: string;
+          end_sec?: number | null;
+          facility_id?: string;
+          id?: string;
+          speaker?: string | null;
+          start_sec?: number | null;
+          text_masked?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "transcript_segment_consultation_id_fkey";
+            columns: ["consultation_id"];
+            isOneToOne: false;
+            referencedRelation: "consultation_session";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "transcript_segment_facility_id_fkey";
             columns: ["facility_id"];
             isOneToOne: false;
             referencedRelation: "facility";
@@ -316,6 +1021,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      commit_import: { Args: { job: Json; rows: Json }; Returns: string };
       touch_session: { Args: Record<PropertyKey, never>; Returns: boolean };
     };
     Enums: {
@@ -432,6 +1138,9 @@ export const Constants = {
   app: {
     Enums: {
       facility_kind: ["hq", "venue"],
+      import_kind: ["consultation", "crm", "ads", "ga4", "images", "market_report"],
+      media: ["google_search", "demand_gen", "meta"],
+      outcome: ["contracted", "not_contracted", "pending"],
       role: ["hq_admin", "marketing", "creative", "facility_admin", "venue_staff", "viewer"],
       user_status: ["invited", "active", "suspended"],
     },

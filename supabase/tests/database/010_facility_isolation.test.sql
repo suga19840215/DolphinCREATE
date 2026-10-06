@@ -8,6 +8,16 @@ select plan(31);
 -- テスト用の施設・利用者・セッション
 ------------------------------------------------------------------------------
 -- 既にあるデータに左右されないよう、トランザクションの中で空にする（最後に rollback で元に戻る）
+delete from public.market_report;
+delete from public.asset;
+delete from public.funnel_event;
+delete from public.media_daily_metric;
+delete from public.crm_lead;
+delete from public.transcript_segment;
+delete from public.customer_insight;
+delete from public.consent_record;
+delete from public.consultation_session;
+delete from public.import_job;
 delete from public.operation_log;
 delete from public.auth_audit;
 delete from app.session_activity;

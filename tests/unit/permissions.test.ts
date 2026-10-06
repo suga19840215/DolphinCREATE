@@ -58,3 +58,19 @@ describe("権限ごとにできること（仕様書3章）", () => {
     expect(canTakeApprovalSlot("venue", ["data"])).toBe(false);
   });
 });
+
+import { canImport } from "@/lib/core/permissions";
+
+describe("取込の権限", () => {
+  it("データの取込は Aさん・施設管理者", () => {
+    expect(canImport(["marketing"], "crm")).toBe(true);
+    expect(canImport(["facility_admin"], "ads")).toBe(true);
+    expect(canImport(["creative"], "crm")).toBe(false);
+    expect(canImport(["venue_staff"], "consultation")).toBe(false);
+    expect(canImport(["hq_admin"], "consultation")).toBe(false);
+  });
+  it("生成画像は Bさんも取り込める", () => {
+    expect(canImport(["creative"], "images")).toBe(true);
+    expect(canImport(["viewer"], "images")).toBe(false);
+  });
+});

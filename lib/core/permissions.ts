@@ -124,3 +124,13 @@ export function canTakeApprovalSlot(
 export function isRole(v: unknown): v is Role {
   return typeof v === "string" && (ROLES as readonly string[]).includes(v);
 }
+
+/** 取込ができるか（データ：Aさん・施設管理者、生成画像：Bさんも可）。DB の app.can_import と同じ。 */
+export function canImport(
+  rolesAtFacility: readonly Role[],
+  kind: "consultation" | "crm" | "ads" | "ga4" | "images" | "market_report",
+): boolean {
+  return kind === "images"
+    ? has(rolesAtFacility, "marketing", "creative", "facility_admin")
+    : has(rolesAtFacility, "marketing", "facility_admin");
+}

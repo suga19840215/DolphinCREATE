@@ -1,10 +1,10 @@
 // 本番設計ドキュメントの受入テスト（docs/auth_design.md「受入テスト」）＝ M1 の完了条件。
 // テスト用の2施設（会場A・会場B）と各権限のアカウントで確かめる。
 // No.10（AIへの依頼）は AI 機能（M4）で本物の依頼に対して確かめる。M1 では送信前の検査を単体テストで確かめる。
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { E2E_PASSWORD } from "./support/env";
-import { USERS, admin, seed, totp, type UserKey } from "./support/fixtures";
+import { USERS, admin, seed, totp } from "./support/fixtures";
+import { login, loginFully } from "./support/login";
 
 let ids: Record<string, string> = {};
 
@@ -18,23 +18,6 @@ test.describe.configure({ mode: "serial" });
 test.beforeAll(async () => {
   ids = await seed();
 });
-
-async function login(page: Page, key: UserKey, password = E2E_PASSWORD) {
-  await page.goto("/login");
-  await page.getByLabel("メールアドレス").fill(USERS[key].email);
-  await page.getByLabel("パスワード").fill(password);
-  await page.getByRole("button", { name: "ログイン" }).click();
-}
-
-async function loginFully(page: Page, key: UserKey) {
-  await login(page, key);
-  if (USERS[key].mfa) {
-    await page.waitForURL("**/mfa");
-    await page.getByLabel("確認コード（6桁）").fill(totp(key));
-    await page.getByRole("button", { name: "確認する" }).click();
-  }
-  await page.waitForURL("**/f/**");
-}
 
 async function newPage(browser: Browser) {
   const context = await browser.newContext();

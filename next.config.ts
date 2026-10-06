@@ -11,6 +11,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // 取込のファイルを受け取るため（公開先 Vercel の上限 約4.5MB に合わせる）
+  experimental: { serverActions: { bodySizeLimit: "4.5mb" } },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

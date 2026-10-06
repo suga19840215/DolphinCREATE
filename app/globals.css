@@ -469,3 +469,58 @@ th.r {
   font-size: 13px;
   min-width: 220px;
 }
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.conn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--surface);
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.tabs button {
+  all: unset;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--ink2);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-color: var(--sky);
+  font-weight: 700;
+}
+.tabs button:focus-visible {
+  outline: 2px solid var(--sky);
+}
+@media (max-width: 1100px) {
+  .grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 860px) {
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cell-1line {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
