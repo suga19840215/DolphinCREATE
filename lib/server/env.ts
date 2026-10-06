@@ -9,6 +9,8 @@ const optionalSecret = z
 const serverEnvSchema = z.object({
   APP_ENV: z.enum(["development", "test", "production"]).default("development"),
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
+  /** 招待・再設定メールのリンク先（この画面の URL） */
+  APP_URL: z.url().default("http://127.0.0.1:3000"),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalSecret,
   SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   ANTHROPIC_API_KEY: optionalSecret,
@@ -34,4 +36,17 @@ let cached: ServerEnv | undefined;
 export function serverEnv(): ServerEnv {
   cached ??= parseServerEnv(process.env);
   return cached;
+}
+
+/** 値が入っていないと動かない秘密を取り出す。足りなければ名前だけを示して止める。 */
+export function requireSecret(
+  name:
+    | "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    | "SUPABASE_SERVICE_ROLE_KEY"
+    | "ANTHROPIC_API_KEY"
+    | "CRON_SECRET",
+): string {
+  const v = serverEnv()[name];
+  if (!v) throw new Error(`環境変数 ${name} が設定されていません`);
+  return v;
 }

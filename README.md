@@ -44,9 +44,11 @@ npm run dev                    # http://127.0.0.1:3000
 
 ```sh
 npm run check      # lint・書式・型検査・単体テスト
-npm run test:db    # DB のテスト（npx supabase db start の後）
-npm run test:e2e   # 画面の自動テスト（ビルドしてから起動）
+npm run test:db    # DB のテスト（行ごとのアクセス制限）。npx supabase start の後
+npm run test:e2e   # 画面の自動テスト（本番設計の受入テストを含む）。npx supabase start と .env.local が必要
 ```
+
+画面の自動テストは、テスト用の2施設（会場A・会場B）と各権限のアカウント（`@e2e.test`）を毎回作り直してから動きます。ローカルや CI の使い捨て DB だけで使い、本番には入れません。
 
 CI（`.github/workflows/ci.yml`）は push のたびに、上の3つと秘密情報の検査（gitleaks）を実行します。
 

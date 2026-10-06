@@ -28,10 +28,10 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
-  database:
-    name: DB（マイグレーション・RLS テスト）
+  database-and-e2e:
+    name: DB（RLS テスト）・画面の自動テスト（受入テスト）
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,25 +39,21 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # ローカルの Postgres を起動し、マイグレーションをすべて適用する
-      - run: npx supabase db start
+      # ローカルの Supabase（DB・認証・ファイル保管・メール）を起動し、マイグレーションをすべて適用する
+      - run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,postgres-meta
       - run: npx supabase test db
-
-  e2e:
-    name: 画面の自動テスト（Playwright）
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
+      - name: テスト用の .env.local を作る（CI の使い捨て環境の値だけ）
+        run: |
+          eval "$(npx supabase status -o env)"
+          {
+            echo "APP_ENV=test"
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } > .env.local
+          echo "SUPABASE_DB_URL=$DB_URL" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

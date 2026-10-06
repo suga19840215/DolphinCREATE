@@ -1,13 +1,27 @@
-export default function HomePage() {
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { canManageAccounts } from "@/lib/core/permissions";
+import { requireUser, selectableFacilities } from "@/lib/server/session";
+
+// ログイン後の入口：見られる最初の施設（クライアント）を開く。
+export default async function Home() {
+  const ctx = await requireUser();
+  const first = selectableFacilities(ctx)[0];
+  if (first) redirect(`/f/${first.code}`);
+
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: "48px 16px" }}>
-      <h1 style={{ margin: 0 }}>Dolphin CREATE</h1>
-      <p className="muted">ブライダルの価値を上げる。結婚式からこの国を元気にする。</p>
-      <section className="panel">
-        <p style={{ margin: 0 }}>
-          準備中です。ログインと施設ごとのデータ分離は次の段階（M1）で入ります。
+    <div className="auth">
+      <div className="authcard stack" style={{ gap: 12 }}>
+        <h1 style={{ fontSize: 18 }}>見られる施設がありません</h1>
+        <p className="small muted">
+          このアカウントには、まだ施設が割り当てられていません。本部管理者に確認してください。
         </p>
-      </section>
-    </main>
+        {canManageAccounts(ctx.allRoles) ? (
+          <Link className="btn pri" href="/accounts">
+            アカウント・施設の管理へ
+          </Link>
+        ) : null}
+      </div>
+    </div>
   );
 }
