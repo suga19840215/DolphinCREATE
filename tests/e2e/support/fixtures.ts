@@ -194,7 +194,9 @@ export async function seed() {
 
   // 取込データを空にする（毎回同じ状態から確かめる）
   await a.from("facility_connection").delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
+  await a.from("page_category").delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
   for (const t of [
+    "site_metric",
     "market_report",
     "asset",
     "funnel_event",
@@ -227,14 +229,10 @@ export async function seed() {
     await a.storage
       .from("facility-files")
       .upload(`${ids[code]}/assets/${code}.png`, png, { contentType: "image/png", upsert: true });
+    // 施設の概要の「最近の操作」の先頭に出るよう、毎回入れ直す
     const marker = `E2E：${code} の操作`;
-    const { data: exists } = await a
-      .from("operation_log")
-      .select("id")
-      .eq("action", marker)
-      .limit(1);
-    if (!exists?.length)
-      await a.from("operation_log").insert({ facility_id: ids[code]!, action: marker });
+    await a.from("operation_log").delete().eq("action", marker);
+    await a.from("operation_log").insert({ facility_id: ids[code]!, action: marker });
   }
   return ids;
 }

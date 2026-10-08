@@ -1003,6 +1003,117 @@ export type Database = {
           },
         ];
       };
+      page_category: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          facility_id: string;
+          id: string;
+          kind: string;
+          label: string;
+          prefix: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          facility_id: string;
+          id?: string;
+          kind: string;
+          label: string;
+          prefix: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          facility_id?: string;
+          id?: string;
+          kind?: string;
+          label?: string;
+          prefix?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "page_category_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "page_category_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      site_metric: {
+        Row: {
+          date: string;
+          dimension: string;
+          engagement_sec: number;
+          events: NonNullable<Json>;
+          facility_id: string;
+          id: string;
+          import_job_id: string | null;
+          key: string;
+          new_users: number;
+          page_views: number;
+          sessions: number;
+          sub_key: string;
+          updated_at: string;
+          users: number;
+        };
+        Insert: {
+          date: string;
+          dimension: string;
+          engagement_sec?: number;
+          events?: NonNullable<Json>;
+          facility_id: string;
+          id?: string;
+          import_job_id?: string | null;
+          key: string;
+          new_users?: number;
+          page_views?: number;
+          sessions?: number;
+          sub_key?: string;
+          updated_at?: string;
+          users?: number;
+        };
+        Update: {
+          date?: string;
+          dimension?: string;
+          engagement_sec?: number;
+          events?: NonNullable<Json>;
+          facility_id?: string;
+          id?: string;
+          import_job_id?: string | null;
+          key?: string;
+          new_users?: number;
+          page_views?: number;
+          sessions?: number;
+          sub_key?: string;
+          updated_at?: string;
+          users?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "site_metric_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "site_metric_import_job_id_fkey";
+            columns: ["import_job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       transcript_segment: {
         Row: {
           confidence: number | null;
@@ -1098,8 +1209,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      commit_ga4: { Args: { funnel: Json; job: Json; site: Json }; Returns: string };
       commit_import: { Args: { job: Json; rows: Json }; Returns: string };
       touch_session: { Args: Record<PropertyKey, never>; Returns: boolean };
+      upsert_site_metrics: { Args: { fid: string; job: string; rows: Json }; Returns: number };
     };
     Enums: {
       [_ in never]: never;

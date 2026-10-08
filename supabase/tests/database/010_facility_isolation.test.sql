@@ -8,6 +8,9 @@ select plan(31);
 -- テスト用の施設・利用者・セッション
 ------------------------------------------------------------------------------
 -- 既にあるデータに左右されないよう、トランザクションの中で空にする（最後に rollback で元に戻る）
+delete from public.site_metric;
+delete from public.page_category;
+delete from public.facility_connection;
 delete from public.market_report;
 delete from public.asset;
 delete from public.funnel_event;

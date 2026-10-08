@@ -26,3 +26,35 @@ describe("対象期間", () => {
     });
   });
 });
+
+import { makePeriod, parsePeriod, periodPresets, previousPeriod } from "@/lib/core/periods";
+
+describe("期間の選択", () => {
+  it("前期間は同じ長さで直前", () => {
+    expect(previousPeriod(makePeriod("2026-09-01", "2026-09-30"))).toMatchObject({
+      start: "2026-08-02",
+      end: "2026-08-31",
+    });
+  });
+  it("先月・今月（日本時間）", () => {
+    const p = periodPresets(new Date("2026-10-07T23:30:00Z")); // 10/8 08:30 JST
+    expect(p.find((x) => x.id === "last-month")!.period).toMatchObject({
+      start: "2026-09-01",
+      end: "2026-09-30",
+    });
+    expect(p.find((x) => x.id === "this-month")!.period).toMatchObject({
+      start: "2026-10-01",
+      end: "2026-10-07",
+    });
+    expect(p.find((x) => x.id === "90d")!.period).toMatchObject({
+      start: "2026-07-10",
+      end: "2026-10-07",
+    });
+  });
+  it("おかしな期間は受け付けない", () => {
+    expect(parsePeriod("2026-09-30", "2026-09-01")).toBeNull();
+    expect(parsePeriod("2026-02-30", "2026-03-01")).toBeNull();
+    expect(parsePeriod("2025-01-01", "2026-06-01")).toBeNull();
+    expect(parsePeriod("2026-09-01", "2026-09-30")).toMatchObject({ start: "2026-09-01" });
+  });
+});

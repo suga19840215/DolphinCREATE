@@ -112,5 +112,7 @@ export async function runGa4Now(_prev: Ga4State, form: FormData): Promise<Ga4Sta
   });
   if (result.status === "unchanged") return { ok: "GA4 の値に変わりはありませんでした。" };
   const upd = result.updated ? `（うち${result.updated}件は登録済みの内容を更新）` : "";
-  return { ok: `GA4 から ${result.rows}件（日付×広告×LP）を取り込みました${upd}。` };
+  return {
+    ok: `GA4 から ${result.rows}件（日付×広告×LP）と、ホームページの切り口別 ${result.siteRows}件を取り込みました${upd}。`,
+  };
 }

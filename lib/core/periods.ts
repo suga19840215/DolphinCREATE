@@ -26,3 +26,58 @@ export function periodRangeUtc(p: Period): { from: string; to: string } {
     to: new Date(Date.parse(`${p.end}T00:00:00+09:00`) + DAY).toISOString(),
   };
 }
+
+const isoDay = (t: number) => new Date(t).toISOString().slice(0, 10);
+const fmtShort = (iso: string) => iso.replaceAll("-", "/");
+
+export function makePeriod(start: string, end: string): Period {
+  return { start, end, label: `${fmtShort(start)}〜${fmtShort(end).slice(5)}` };
+}
+
+/** 同じ長さの、ひとつ前の期間（前期比に使う） */
+export function previousPeriod(p: Period): Period {
+  const s = Date.parse(`${p.start}T00:00:00Z`);
+  const e = Date.parse(`${p.end}T00:00:00Z`);
+  const len = e - s + DAY;
+  return makePeriod(isoDay(s - len), isoDay(e - len));
+}
+
+/** 画面で選べる期間（日本時間の日付） */
+export function periodPresets(now: Date) {
+  const today = tokyoDate(now.getTime());
+  const yesterday = tokyoDate(now.getTime() - DAY);
+  const [y, m] = today.split("-").map(Number) as [number, number];
+  const monthStart = `${today.slice(0, 7)}-01`;
+  const lastMonthEnd = isoDay(Date.parse(`${monthStart}T00:00:00Z`) - DAY);
+  const lastMonthStart = `${lastMonthEnd.slice(0, 7)}-01`;
+  const four = lastFourWeeks(now).current;
+  return [
+    { id: "4w", label: "直近4週", period: makePeriod(four.start, four.end) },
+    {
+      id: "90d",
+      label: "直近90日",
+      period: makePeriod(isoDay(Date.parse(`${yesterday}T00:00:00Z`) - 89 * DAY), yesterday),
+    },
+    {
+      id: "this-month",
+      label: `今月（${m}月）`,
+      period: makePeriod(monthStart, yesterday < monthStart ? monthStart : yesterday),
+    },
+    {
+      id: "last-month",
+      label: `先月（${Number(lastMonthEnd.slice(5, 7))}月）`,
+      period: makePeriod(lastMonthStart, lastMonthEnd),
+    },
+  ].filter(() => y > 0);
+}
+
+/** 画面から受け取った期間。形が違う・長すぎる（400日超）ときは null */
+export function parsePeriod(from?: string, to?: string): Period | null {
+  if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to))
+    return null;
+  const s = Date.parse(`${from}T00:00:00Z`);
+  const e = Date.parse(`${to}T00:00:00Z`);
+  if (Number.isNaN(s) || Number.isNaN(e) || s > e || e - s > 400 * DAY) return null;
+  if (isoDay(s) !== from || isoDay(e) !== to) return null;
+  return makePeriod(from, to);
+}

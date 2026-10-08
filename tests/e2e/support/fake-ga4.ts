@@ -40,21 +40,68 @@ export function startFakeGa4(port: number): Promise<FakeGa4> {
       calls.push({ property, dimensions: q.dimensions.map((d) => d.name), auth });
       const end = q.dateRanges[0]!.endDate;
       const dates = [addDays(end, -1), end];
-      const row = (dims: string[], v: number) => ({
+      const row = (dims: string[], ...v: number[]) => ({
         dimensionValues: dims.map((value) => ({ value })),
-        metricValues: [{ value: String(v) }],
+        metricValues: v.map((x) => ({ value: String(x) })),
       });
-      const rows = q.dimensions.some((d) => d.name === "eventName")
-        ? dates.flatMap((d) => [
-            row([day(d), "AM-01", "/fair/tasting?utm_source=ig", "select_fair"], 20 * version),
-            row([day(d), "AM-01", "/fair/tasting", "form_start"], 8),
-            row([day(d), "AM-01", "/fair/tasting", "generate_lead"], 3),
-            row([day(d), "(not set)", "/", "generate_lead"], 1),
-          ])
-        : dates.flatMap((d) => [
-            row([day(d), "AM-01", "/fair/tasting?utm_source=ig", "sessions"].slice(0, 3), 100),
-            row([day(d), "(not set)", "/"], 30),
-          ]);
+      const names = q.dimensions.map((d) => d.name);
+      const hasEvent = names.includes("eventName");
+      let rows: ReturnType<typeof row>[];
+      if (names.includes("sessionManualAdContent")) {
+        // 広告×LP（funnel_event）
+        rows = hasEvent
+          ? dates.flatMap((d) => [
+              row([day(d), "AM-01", "/fair/tasting?utm_source=ig", "select_fair"], 20 * version),
+              row([day(d), "AM-01", "/fair/tasting", "form_start"], 8),
+              row([day(d), "AM-01", "/fair/tasting", "generate_lead"], 3),
+              row([day(d), "(not set)", "/", "generate_lead"], 1),
+            ])
+          : dates.flatMap((d) => [
+              row([day(d), "AM-01", "/fair/tasting?utm_source=ig"], 100),
+              row([day(d), "(not set)", "/"], 30),
+            ]);
+      } else {
+        // 切り口別（site_metric）。2つ目以降の次元の値の組み合わせを固定で返す
+        const values: string[][] = {
+          sessionDefaultChannelGroup: [
+            ["Paid Search", "google / cpc"],
+            ["Paid Social", "instagram / paid_social"],
+            ["Referral", "zexy.net / referral"],
+            ["Organic Search", "google / organic"],
+          ],
+          landingPage: [["/"], ["/lp/tasting?utm_source=ig"], ["/fair/tasting"]],
+          deviceCategory: [["mobile"], ["desktop"]],
+          region: [["Kanagawa"], ["Tokyo"]],
+          newVsReturning: [["new"], ["returning"]],
+          hour: [["10"], ["21"]],
+          pagePath: [["/fair/tasting"], ["/chapel"], ["/cuisine"], ["/access"]],
+        }[names[1]!] ?? [["x"]];
+        const events: [string, number, number][] = [
+          ["view_fair", 60, 50],
+          ["select_fair", 24, 20],
+          ["form_start", 12, 10],
+          ["form_error", 3, 2],
+          ["generate_lead", 6, 6],
+          ["request_brochure", 2, 2],
+          ["contact", 1, 1],
+        ];
+        rows = dates.flatMap((d) =>
+          values.flatMap((v, i) =>
+            hasEvent
+              ? events.map(([e, c, s]) => row([day(d), ...v, e], c * (i + 1), s * (i + 1)))
+              : [
+                  row(
+                    [day(d), ...v],
+                    100 * (i + 1),
+                    90 * (i + 1),
+                    60 * (i + 1),
+                    250 * (i + 1),
+                    6000 * (i + 1),
+                  ),
+                ],
+          ),
+        );
+      }
       return send(200, { rows, rowCount: rows.length });
     });
   });

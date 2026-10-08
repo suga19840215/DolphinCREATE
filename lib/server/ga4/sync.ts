@@ -1,12 +1,19 @@
 import "server-only";
 import { createHash } from "node:crypto";
+import {
+  SITE_BASE_METRICS,
+  SITE_DIMENSION_SPECS,
+  SITE_EVENT_METRICS,
+  toSiteRows,
+} from "@/lib/core/ga4/site-transform";
 import { FUNNEL_EVENTS, toFunnelRows } from "@/lib/core/ga4/transform";
+import { SITE_DIMENSIONS, SITE_EVENTS } from "@/lib/core/site/report";
 import { adminClient, userClient } from "../supabase";
 import { Ga4Error, runReport } from "./client";
 
 export type SyncRange = { startDate: string; endDate: string };
 export type SyncResult =
-  | { status: "imported"; rows: number; updated: number; jobId: string }
+  | { status: "imported"; rows: number; siteRows: number; updated: number; jobId: string }
   | { status: "unchanged" }
   | { status: "error"; message: string };
 
@@ -38,8 +45,34 @@ export async function syncGa4(opts: {
       }),
     ]);
     const rows = toFunnelRows(sessions, events);
+
+    // ⑤ ホームページでの予約獲得：切り口ごとに「基本の値」と「イベント別（件数・セッション数）」を取る
+    const site = (
+      await Promise.all(
+        SITE_DIMENSIONS.map(async (dim) => {
+          const dims = SITE_DIMENSION_SPECS[dim].map((name) => ({ name }));
+          const [base, ev] = await Promise.all([
+            runReport(opts.propertyId, {
+              dateRanges: [opts.range],
+              dimensions: dims,
+              metrics: SITE_BASE_METRICS.map((name) => ({ name })),
+            }),
+            runReport(opts.propertyId, {
+              dateRanges: [opts.range],
+              dimensions: [...dims, { name: "eventName" }],
+              metrics: SITE_EVENT_METRICS.map((name) => ({ name })),
+              dimensionFilter: {
+                filter: { fieldName: "eventName", inListFilter: { values: [...SITE_EVENTS] } },
+              },
+            }),
+          ]);
+          return toSiteRows(dim, base, ev);
+        }),
+      )
+    ).flat();
+
     const hash = createHash("sha256")
-      .update(JSON.stringify({ p: opts.propertyId, r: opts.range, rows }))
+      .update(JSON.stringify({ p: opts.propertyId, r: opts.range, rows, site }))
       .digest("hex");
 
     // 登録済みの行（同じ日×広告×LP）は上書きになる
@@ -52,7 +85,7 @@ export async function syncGa4(opts: {
     const have = new Set((existing ?? []).map((e) => `${e.date}|${e.ad_id}|${e.landing_page}`));
     const updated = rows.filter((r) => have.has(`${r.date}|${r.ad_id}|${r.landing_page}`)).length;
 
-    const { data: jobId, error } = await writer.rpc("commit_import", {
+    const { data: jobId, error } = await writer.rpc("commit_ga4", {
       job: {
         facility_id: opts.facilityId,
         kind: "ga4",
@@ -60,8 +93,8 @@ export async function syncGa4(opts: {
         file_sha256: hash,
         encoding: "api",
         run_label: opts.mode === "auto" ? "GA4（自動・日次）" : "",
-        rows_total: rows.length,
-        rows_ok: rows.length - updated,
+        rows_total: rows.length + site.length,
+        rows_ok: rows.length - updated + site.length,
         rows_updated: updated,
         rows_duplicate: 0,
         rows_missing: 0,
@@ -71,7 +104,8 @@ export async function syncGa4(opts: {
         pii_columns_dropped: [],
         masked_count: 0,
       },
-      rows: rows as never,
+      funnel: rows as never,
+      site: site as never,
     });
 
     if (error?.code === "23505") {
@@ -80,7 +114,7 @@ export async function syncGa4(opts: {
     }
     if (error || !jobId) throw new Error("取り込んだ値を保存できませんでした。");
     await mark(opts.facilityId, "ok", null);
-    return { status: "imported", rows: rows.length, updated, jobId };
+    return { status: "imported", rows: rows.length, siteRows: site.length, updated, jobId };
   } catch (e) {
     const message =
       e instanceof Ga4Error || e instanceof Error ? e.message : "GA4 から取り込めませんでした。";
