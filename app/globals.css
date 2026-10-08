@@ -453,7 +453,7 @@ th.r {
     padding: 16px;
   }
   .grid2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .top .end {
     margin-left: 0;
@@ -584,7 +584,7 @@ th.r {
 }
 .steps {
   display: grid;
-  grid-template-columns: minmax(130px, 1.2fr) 80px minmax(100px, 2fr) 90px;
+  grid-template-columns: minmax(0, 1.2fr) 64px minmax(40px, 2fr) 72px;
   gap: 8px 12px;
   align-items: center;
   font-size: 12.5px;
