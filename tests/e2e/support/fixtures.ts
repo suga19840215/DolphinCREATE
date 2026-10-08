@@ -193,6 +193,7 @@ export async function seed() {
   }
 
   // 取込データを空にする（毎回同じ状態から確かめる）
+  await a.from("facility_connection").delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
   for (const t of [
     "market_report",
     "asset",

@@ -9,6 +9,9 @@ import { MEDIA_LABEL } from "@/lib/server/imports";
 import { requireFacility } from "@/lib/server/session";
 import { userClient } from "@/lib/server/supabase";
 import { ImportPanel } from "./import-panel";
+import { Ga4Panel } from "./ga4-panel";
+import { recentDays } from "@/lib/core/ga4/transform";
+import { readServiceAccount } from "@/lib/server/ga4/client";
 
 const KIND_LABEL: Record<string, string> = {
   ...IMPORT_KIND_LABEL,
@@ -65,6 +68,19 @@ export default async function DolphinPage({ params }: { params: Promise<{ code: 
       .lte("date", current.end),
   ]);
 
+  const { data: ga4Conn } = await supabase
+    .from("facility_connection")
+    .select("account_ref, enabled, last_synced_at, last_status, last_error")
+    .eq("facility_id", facility.id)
+    .eq("provider", "ga4")
+    .maybeSingle();
+  let serviceAccount: string | null = null;
+  try {
+    serviceAccount = readServiceAccount().client_email;
+  } catch {
+    serviceAccount = null;
+  }
+
   const jobList = jobs.data ?? [];
   const lastOf = (kind: string) => jobList.find((j) => j.kind === kind)?.at ?? null;
   const noConsent = jobList
@@ -111,9 +127,17 @@ export default async function DolphinPage({ params }: { params: Promise<{ code: 
     ["Meta 広告", "CSV取込", "sky", "API での取込は M5、承認済みの広告の配信は M4b"],
     [
       "GA4",
-      lastOf("ga4") ? `CSV取込（最終 ${fmt(lastOf("ga4"))}）` : "CSV取込（未取込）",
-      "sky",
-      "LP・予約フォームのイベント",
+      ga4Conn
+        ? ga4Conn.last_status === "error"
+          ? "API（取込に失敗）"
+          : ga4Conn.last_synced_at
+            ? `API（最終 ${fmt(ga4Conn.last_synced_at)}）`
+            : "API（登録済み）"
+        : lastOf("ga4")
+          ? `CSV取込（最終 ${fmt(lastOf("ga4"))}）`
+          : "未接続",
+      ga4Conn?.last_status === "error" ? "warn" : ga4Conn ? "good" : "sky",
+      "LP・予約フォームのイベント。毎朝の自動取込（下の「GA4 の接続」）",
     ],
   ];
 
@@ -141,6 +165,17 @@ export default async function DolphinPage({ params }: { params: Promise<{ code: 
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="panel" id="ga4">
+        <h2>GA4 の接続</h2>
+        <Ga4Panel
+          code={facility.code}
+          conn={ga4Conn ?? null}
+          canEdit={canImport(roles, "ga4")}
+          serviceAccount={serviceAccount}
+          defaultRange={recentDays(new Date(), 28)}
+        />
       </section>
 
       <section className="panel">

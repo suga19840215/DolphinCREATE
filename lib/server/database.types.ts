@@ -52,6 +52,7 @@ export type Database = {
       import_kind: "consultation" | "crm" | "ads" | "ga4" | "images" | "market_report";
       media: "google_search" | "demand_gen" | "meta";
       outcome: "contracted" | "not_contracted" | "pending";
+      provider: "ga4" | "meta" | "google_ads" | "dolphin";
       role: "hq_admin" | "marketing" | "creative" | "facility_admin" | "venue_staff" | "viewer";
       user_status: "invited" | "active" | "suspended";
     };
@@ -580,6 +581,82 @@ export type Database = {
           updated_by?: string | null;
         };
         Relationships: [];
+      };
+      facility_connection: {
+        Row: {
+          account_ref: string;
+          created_at: string;
+          created_by: string | null;
+          enabled: boolean;
+          external_facility_id: string | null;
+          facility_id: string;
+          id: string;
+          last_error: string | null;
+          last_status: string | null;
+          last_synced_at: string | null;
+          provider: Database["app"]["Enums"]["provider"];
+          secret_encrypted: string | null;
+          secret_expires_at: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          account_ref: string;
+          created_at?: string;
+          created_by?: string | null;
+          enabled?: boolean;
+          external_facility_id?: string | null;
+          facility_id: string;
+          id?: string;
+          last_error?: string | null;
+          last_status?: string | null;
+          last_synced_at?: string | null;
+          provider: Database["app"]["Enums"]["provider"];
+          secret_encrypted?: string | null;
+          secret_expires_at?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          account_ref?: string;
+          created_at?: string;
+          created_by?: string | null;
+          enabled?: boolean;
+          external_facility_id?: string | null;
+          facility_id?: string;
+          id?: string;
+          last_error?: string | null;
+          last_status?: string | null;
+          last_synced_at?: string | null;
+          provider?: Database["app"]["Enums"]["provider"];
+          secret_encrypted?: string | null;
+          secret_expires_at?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "facility_connection_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "facility_connection_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "facility_connection_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       funnel_event: {
         Row: {
@@ -1141,6 +1218,7 @@ export const Constants = {
       import_kind: ["consultation", "crm", "ads", "ga4", "images", "market_report"],
       media: ["google_search", "demand_gen", "meta"],
       outcome: ["contracted", "not_contracted", "pending"],
+      provider: ["ga4", "meta", "google_ads", "dolphin"],
       role: ["hq_admin", "marketing", "creative", "facility_admin", "venue_staff", "viewer"],
       user_status: ["invited", "active", "suspended"],
     },

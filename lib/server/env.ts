@@ -17,6 +17,7 @@ const serverEnvSchema = z.object({
   AI_MODEL: optionalSecret,
   CRON_SECRET: optionalSecret,
   CONNECTION_ENCRYPTION_KEY: optionalSecret,
+  GA4_SERVICE_ACCOUNT_JSON: optionalSecret,
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

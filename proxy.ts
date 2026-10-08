@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // ログインの cookie を毎回更新し、ログインしていない人をログイン画面へ送る。
 // 施設・権限の確認は各画面のサーバー処理と DB の行ごとのアクセス制限で行う（ここは入口だけ）。
-const PUBLIC_PATHS = ["/login", "/auth/confirm", "/api/health"];
+// /api/cron は定期実行用（秘密のトークンで守る）
+const PUBLIC_PATHS = ["/login", "/auth/confirm", "/api/health", "/api/cron"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
