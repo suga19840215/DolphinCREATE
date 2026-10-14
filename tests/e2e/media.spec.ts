@@ -70,6 +70,10 @@ const upload = async (page: Page, name: string, mimeType: string, buffer: Buffer
   await page.getByLabel("資料のファイル").setInputFiles({ name, mimeType, buffer });
   await page.getByRole("button", { name: "読み取る" }).click();
 };
+const row2 = (page: Page, label: string) =>
+  page
+    .getByTestId("media-eval2")
+    .locator("tbody tr", { has: page.locator("th", { hasText: label }) });
 const row = (page: Page, label: string) =>
   page
     .getByTestId("media-eval")
@@ -213,10 +217,11 @@ test("PDF は AI が読み取り（P0 を先頭に付け、連絡先を含めな
   ).toContainText("エリア平均 2行");
 
   await open(page);
-  const z = row(page, "ゼクシィ本誌");
+  const z = row2(page, "ゼクシィ本誌");
   await expect(z).toContainText("125%"); // 20 ÷ 16
   await expect(z).toContainText("昨年 100%"); // 18 ÷ 18
   await expect(z).toContainText("上昇");
+  await expect(z).toContainText("横浜");
   await expect(row(page, "みんなのウェディング")).toContainText("150,000円");
 
   const { data: logs } = await admin()
@@ -287,9 +292,9 @@ test("TOP 広告を登録すると、来館メイン顧客との合致が出て�
   await expect(card.locator(".pill", { hasText: "不一致" })).toBeVisible(); // ビジュアルはチャペル
   await expect(card.locator(".pill", { hasText: "合致" }).first()).toBeVisible(); // キャッチは料理
   await expect(card.locator("img")).toHaveAttribute("src", /token=/);
-  const z = row(page, "ゼクシィ本誌");
-  await expect(z.locator("td").nth(9)).toContainText("不一致");
-  await expect(z.locator("td").nth(10)).toContainText("合致");
+  const z = row2(page, "ゼクシィ本誌");
+  await expect(z.locator("td").nth(3)).toContainText("不一致");
+  await expect(z.locator("td").nth(4)).toContainText("合致");
 
   await card.getByRole("button", { name: "AI の補足（理由と改善案）" }).click();
   await expect(card.getByTestId("ai-comment")).toContainText("料理で選ぶ結婚式");

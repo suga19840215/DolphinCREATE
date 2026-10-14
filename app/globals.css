@@ -712,6 +712,13 @@ table.draft tr.needs td {
 .evaltable th[scope="row"] {
   vertical-align: top;
 }
+.evaltable td.r {
+  white-space: nowrap;
+}
+.evaltable .num,
+.evaltable .sub {
+  white-space: nowrap;
+}
 .evaltable .num,
 .evaltable .sub,
 #media-months .num {

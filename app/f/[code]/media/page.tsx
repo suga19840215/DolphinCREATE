@@ -81,16 +81,24 @@ const yen = (v: number | null) => formatYen(v);
 const cnt = (v: number | null) => formatCount(v);
 const pct = (v: number | null) => formatPercent(v, 0);
 
+const Name = ({ r }: { r: OutletEvaluation }) => (
+  <th scope="row">
+    {r.label}
+    {r.menus.length ? <span className="sub">{r.menus.join("・")}</span> : null}
+  </th>
+);
+
+/** 来館・成約の評価（目標比・昨年比・単価） */
 function EvalRow({ r, total = false }: { r: OutletEvaluation; total?: boolean }) {
   return (
     <tr className={total ? "total" : undefined}>
-      <th scope="row">
-        {r.label}
-        {r.menus.length ? <span className="sub">{r.menus.join("・")}</span> : null}
-      </th>
+      <Name r={r} />
+      <td>
+        <Pill j={r.overall} />
+      </td>
       <td className="r">{r.cost === null ? "—" : yen(r.cost)}</td>
       <td className="r">
-        <span className="num">{cnt(r.visits)}</span>
+        <span className="num">{cnt(r.visits)}件</span>
         <span className="sub">目標 {r.target ? cnt(r.target) : "—"}</span>
       </td>
       <td className="r">
@@ -107,13 +115,23 @@ function EvalRow({ r, total = false }: { r: OutletEvaluation; total?: boolean })
         <Pill j={r.judges.visitCost} />
       </td>
       <td className="r">
-        <span className="num">{cnt(r.contracts)}</span>
-        <span className="sub">昨年 {cnt(r.lastContracts)}</span>
+        <span className="num">{cnt(r.contracts)}件</span>
+        <span className="sub">昨年 {cnt(r.lastContracts)}件</span>
       </td>
       <td className="r">
         <Two now={r.contractCost} before={r.lastContractCost} fmt={yen} />
         <Pill j={r.judges.contractCost} />
       </td>
+    </tr>
+  );
+}
+
+/** エリア平均との比較と、TOP 広告の合致 */
+function AreaRow({ r, total = false }: { r: OutletEvaluation; total?: boolean }) {
+  return (
+    <tr className={total ? "total" : undefined}>
+      <Name r={r} />
+      <td className="small">{r.areaName || "—"}</td>
       <td className="r">
         <Two now={r.areaVisitShare} before={r.lastAreaVisitShare} fmt={pct} />
         <Pill j={r.judges.areaVisit} />
@@ -124,9 +142,6 @@ function EvalRow({ r, total = false }: { r: OutletEvaluation; total?: boolean })
       </td>
       <td>{total ? <span className="na">—</span> : <Pill j={r.judges.visual} />}</td>
       <td>{total ? <span className="na">—</span> : <Pill j={r.judges.catch} />}</td>
-      <td>
-        <Pill j={r.overall} />
-      </td>
     </tr>
   );
 }
@@ -309,6 +324,7 @@ export default async function MediaPage({
                 <thead>
                   <tr>
                     <th>媒体</th>
+                    <th>総合</th>
                     <th className="r">掲載金額</th>
                     <th className="r">来館件数</th>
                     <th className="r">目標比</th>
@@ -316,11 +332,6 @@ export default async function MediaPage({
                     <th className="r">来館単価</th>
                     <th className="r">成約件数</th>
                     <th className="r">成約単価</th>
-                    <th className="r">エリア平均比（来館）</th>
-                    <th className="r">エリア平均比（成約）</th>
-                    <th>ビジュアル合致</th>
-                    <th>キャッチ合致</th>
-                    <th>総合</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -328,6 +339,27 @@ export default async function MediaPage({
                     <EvalRow key={r.outlet} r={r} />
                   ))}
                   <EvalRow r={ev.total} total />
+                </tbody>
+              </table>
+            </div>
+            <h3 style={{ marginTop: 16 }}>エリア平均との比較と、TOP 広告の合致</h3>
+            <div className="tw">
+              <table className="evaltable" data-testid="media-eval2">
+                <thead>
+                  <tr>
+                    <th>媒体</th>
+                    <th>エリア</th>
+                    <th className="r">エリア平均比（来館）</th>
+                    <th className="r">エリア平均比（成約）</th>
+                    <th>ビジュアル合致</th>
+                    <th>キャッチ合致</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ev.rows.map((r) => (
+                    <AreaRow key={r.outlet} r={r} />
+                  ))}
+                  <AreaRow r={ev.total} total />
                 </tbody>
               </table>
             </div>
