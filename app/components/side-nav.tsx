@@ -10,6 +10,7 @@ const MENU = [
   { key: "creative", n: "3", label: "広告クリエイティブ案", ready: false },
   { key: "adreport", n: "4", label: "広告分析レポート", ready: false },
   { key: "funnel", n: "5", label: "予約・来館・成約", ready: true },
+  { key: "media", n: "6", label: "メディア評価測定", ready: true },
 ] as const;
 
 export function SideNav({ code, showAccounts }: { code: string; showAccounts: boolean }) {

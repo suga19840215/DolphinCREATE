@@ -134,3 +134,8 @@ export function canImport(
     ? has(rolesAtFacility, "marketing", "creative", "facility_admin")
     : has(rolesAtFacility, "marketing", "facility_admin");
 }
+
+/** ⑥ メディア評価測定の資料の取込・確定・入力（DB の app.can_edit_media と同じ） */
+export function canEditMedia(rolesAtFacility: readonly Role[]): boolean {
+  return has(rolesAtFacility, "marketing", "facility_admin");
+}

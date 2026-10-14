@@ -673,3 +673,87 @@ h3 {
   font-size: 9px;
   color: var(--ink3);
 }
+.dropbox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--surface2);
+  cursor: pointer;
+}
+.dropbox.over {
+  border-color: var(--sky);
+  background: var(--accentbg);
+}
+.dropbox input[type="file"] {
+  max-width: 100%;
+}
+input.numin {
+  width: 7.5em;
+  text-align: right;
+}
+table.draft td {
+  vertical-align: top;
+}
+table.draft input,
+table.draft select {
+  max-width: 12em;
+}
+table.draft tr.needs td {
+  background: var(--warnbg);
+}
+.warnink {
+  color: var(--warn);
+}
+.evaltable td,
+.evaltable th[scope="row"] {
+  vertical-align: top;
+}
+.evaltable .num,
+.evaltable .sub,
+#media-months .num {
+  display: block;
+}
+.sub {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink3);
+  font-weight: 400;
+}
+.evaltable td .pill {
+  margin-top: 3px;
+}
+.evaltable tr.total th,
+.evaltable tr.total td {
+  border-top: 2px solid var(--line);
+  font-weight: 700;
+}
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.check {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font-size: 12.5px;
+}
+.aibox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--accentbg);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.adthumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex: 0 0 auto;
+}

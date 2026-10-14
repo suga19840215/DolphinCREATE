@@ -8,6 +8,11 @@ select plan(31);
 -- テスト用の施設・利用者・セッション
 ------------------------------------------------------------------------------
 -- 既にあるデータに左右されないよう、トランザクションの中で空にする（最後に rollback で元に戻る）
+delete from public.media_result;
+delete from public.media_area_benchmark;
+delete from public.media_top_ad;
+delete from public.media_doc;
+delete from public.ai_run_log;
 delete from public.site_metric;
 delete from public.page_category;
 delete from public.facility_connection;

@@ -3,6 +3,11 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(12);
 
+delete from public.media_result;
+delete from public.media_area_benchmark;
+delete from public.media_top_ad;
+delete from public.media_doc;
+delete from public.ai_run_log;
 delete from public.site_metric;
 delete from public.page_category;
 delete from public.facility_connection;

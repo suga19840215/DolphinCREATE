@@ -29,6 +29,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      can_edit_media: { Args: { fid: string }; Returns: boolean };
       can_import: {
         Args: { fid: string; kind: Database["app"]["Enums"]["import_kind"] };
         Returns: boolean;
@@ -62,6 +63,63 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_run_log: {
+        Row: {
+          at: string;
+          error: string | null;
+          facility_id: string;
+          id: string;
+          input: NonNullable<Json>;
+          model: string;
+          output: Json | null;
+          prompt_version: string;
+          purpose: string;
+          run_by: string | null;
+          schema_valid: boolean;
+        };
+        Insert: {
+          at?: string;
+          error?: string | null;
+          facility_id: string;
+          id?: string;
+          input: NonNullable<Json>;
+          model: string;
+          output?: Json | null;
+          prompt_version: string;
+          purpose: string;
+          run_by?: string | null;
+          schema_valid?: boolean;
+        };
+        Update: {
+          at?: string;
+          error?: string | null;
+          facility_id?: string;
+          id?: string;
+          input?: NonNullable<Json>;
+          model?: string;
+          output?: Json | null;
+          prompt_version?: string;
+          purpose?: string;
+          run_by?: string | null;
+          schema_valid?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_run_log_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ai_run_log_run_by_fkey";
+            columns: ["run_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       app_user: {
         Row: {
           created_at: string;
@@ -883,6 +941,67 @@ export type Database = {
           },
         ];
       };
+      media_area_benchmark: {
+        Row: {
+          area: string;
+          avg_contracts: number | null;
+          avg_visits: number | null;
+          facility_id: string;
+          id: string;
+          month: string;
+          outlet: string;
+          source_doc_id: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          area?: string;
+          avg_contracts?: number | null;
+          avg_visits?: number | null;
+          facility_id: string;
+          id?: string;
+          month: string;
+          outlet?: string;
+          source_doc_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          area?: string;
+          avg_contracts?: number | null;
+          avg_visits?: number | null;
+          facility_id?: string;
+          id?: string;
+          month?: string;
+          outlet?: string;
+          source_doc_id?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_area_benchmark_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_area_benchmark_source_doc_id_fkey";
+            columns: ["source_doc_id"];
+            isOneToOne: false;
+            referencedRelation: "media_doc";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_area_benchmark_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       media_daily_metric: {
         Row: {
           ad_group: string | null;
@@ -951,6 +1070,203 @@ export type Database = {
             columns: ["import_job_id"];
             isOneToOne: false;
             referencedRelation: "import_job";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      media_doc: {
+        Row: {
+          confirmed_at: string | null;
+          confirmed_by: string | null;
+          content_type: string;
+          created_at: string;
+          draft: NonNullable<Json>;
+          facility_id: string;
+          file_name: string;
+          file_sha256: string;
+          id: string;
+          message: string | null;
+          method: string | null;
+          size_bytes: number;
+          status: string;
+          storage_path: string;
+          uploaded_by: string;
+        };
+        Insert: {
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
+          content_type: string;
+          created_at?: string;
+          draft?: NonNullable<Json>;
+          facility_id: string;
+          file_name: string;
+          file_sha256: string;
+          id?: string;
+          message?: string | null;
+          method?: string | null;
+          size_bytes: number;
+          status?: string;
+          storage_path: string;
+          uploaded_by: string;
+        };
+        Update: {
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
+          content_type?: string;
+          created_at?: string;
+          draft?: NonNullable<Json>;
+          facility_id?: string;
+          file_name?: string;
+          file_sha256?: string;
+          id?: string;
+          message?: string | null;
+          method?: string | null;
+          size_bytes?: number;
+          status?: string;
+          storage_path?: string;
+          uploaded_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_doc_confirmed_by_fkey";
+            columns: ["confirmed_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_doc_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_doc_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      media_result: {
+        Row: {
+          contracts: number | null;
+          cost_yen: number | null;
+          facility_id: string;
+          id: string;
+          menu: string;
+          month: string;
+          note: string | null;
+          outlet: string;
+          source_doc_id: string | null;
+          target_visits: number | null;
+          updated_at: string;
+          updated_by: string | null;
+          visits: number | null;
+        };
+        Insert: {
+          contracts?: number | null;
+          cost_yen?: number | null;
+          facility_id: string;
+          id?: string;
+          menu?: string;
+          month: string;
+          note?: string | null;
+          outlet: string;
+          source_doc_id?: string | null;
+          target_visits?: number | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          visits?: number | null;
+        };
+        Update: {
+          contracts?: number | null;
+          cost_yen?: number | null;
+          facility_id?: string;
+          id?: string;
+          menu?: string;
+          month?: string;
+          note?: string | null;
+          outlet?: string;
+          source_doc_id?: string | null;
+          target_visits?: number | null;
+          updated_at?: string;
+          updated_by?: string | null;
+          visits?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_result_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_result_source_doc_id_fkey";
+            columns: ["source_doc_id"];
+            isOneToOne: false;
+            referencedRelation: "media_doc";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_result_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      media_top_ad: {
+        Row: {
+          catch_axes: string[];
+          catch_text: string;
+          facility_id: string;
+          id: string;
+          outlet: string;
+          updated_at: string;
+          updated_by: string | null;
+          visual_axes: string[];
+          visual_path: string | null;
+        };
+        Insert: {
+          catch_axes?: string[];
+          catch_text?: string;
+          facility_id: string;
+          id?: string;
+          outlet: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          visual_axes?: string[];
+          visual_path?: string | null;
+        };
+        Update: {
+          catch_axes?: string[];
+          catch_text?: string;
+          facility_id?: string;
+          id?: string;
+          outlet?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+          visual_axes?: string[];
+          visual_path?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_top_ad_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facility";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "media_top_ad_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "app_user";
             referencedColumns: ["id"];
           },
         ];
@@ -1211,6 +1527,10 @@ export type Database = {
     Functions: {
       commit_ga4: { Args: { funnel: Json; job: Json; site: Json }; Returns: string };
       commit_import: { Args: { job: Json; rows: Json }; Returns: string };
+      save_media_rows: {
+        Args: { areas: Json; doc: string; fid: string; results: Json };
+        Returns: number;
+      };
       touch_session: { Args: Record<PropertyKey, never>; Returns: boolean };
       upsert_site_metrics: { Args: { fid: string; job: string; rows: Json }; Returns: number };
     };

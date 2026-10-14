@@ -16,6 +16,9 @@ const port = Number(process.env.E2E_PORT ?? 3100);
 const fakeGa4Port = Number(process.env.E2E_FAKE_GA4_PORT ?? 3199);
 process.env.E2E_FAKE_GA4_PORT = String(fakeGa4Port);
 process.env.E2E_CRON_SECRET ??= "e2e-cron-secret";
+// AI（Claude API）も、テストでは偽のサーバー（tests/e2e/support/fake-ai.ts）へ向ける
+const fakeAiPort = Number(process.env.E2E_FAKE_AI_PORT ?? 3198);
+process.env.E2E_FAKE_AI_PORT = String(fakeAiPort);
 if (!process.env.E2E_GA4_KEY) {
   const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   process.env.E2E_GA4_KEY = JSON.stringify({
@@ -53,6 +56,8 @@ export default defineConfig({
       GA4_SERVICE_ACCOUNT_JSON: process.env.E2E_GA4_KEY!,
       GA4_API_BASE: `http://127.0.0.1:${fakeGa4Port}`,
       GOOGLE_TOKEN_URL: `http://127.0.0.1:${fakeGa4Port}/token`,
+      ANTHROPIC_API_KEY: "e2e-fake-key",
+      ANTHROPIC_BASE_URL: `http://127.0.0.1:${fakeAiPort}`,
     },
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: !process.env.CI,

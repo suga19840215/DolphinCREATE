@@ -196,6 +196,15 @@ export async function seed() {
   await a.from("facility_connection").delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
   await a.from("page_category").delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
   for (const t of [
+    "media_result",
+    "media_area_benchmark",
+    "media_top_ad",
+    "media_doc",
+    "ai_run_log",
+  ] as const) {
+    await a.from(t).delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
+  }
+  for (const t of [
     "site_metric",
     "market_report",
     "asset",
@@ -211,6 +220,13 @@ export async function seed() {
     await a.from(t).delete().in("facility_id", [ids.fac_A!, ids.fac_B!]);
   }
   for (const code of ["fac_A", "fac_B"]) {
+    for (const dir of ["media-docs", "media-ads"]) {
+      const { data: list } = await a.storage.from("facility-files").list(`${ids[code]}/${dir}`);
+      if (list?.length)
+        await a.storage
+          .from("facility-files")
+          .remove(list.map((f) => `${ids[code]}/${dir}/${f.name}`));
+    }
     const { data: files } = await a.storage
       .from("facility-files")
       .list(`${ids[code]}/assets/dolphin`);
